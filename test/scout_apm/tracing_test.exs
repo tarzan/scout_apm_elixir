@@ -21,6 +21,23 @@ defmodule ScoutApm.TracingTest do
       """)
     end
 
+    test "creates layers" do
+      Code.eval_string(
+      """
+      defmodule TracingAnnotationTestModule do
+        use ScoutApm.Tracing
+
+        @transaction(type: "background")
+        def bar do
+          1
+        end
+      end
+      """)
+
+      assert TracingAnnotationTestModule.bar() == 1
+      assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
+    end
+
     test "explicit name" do
       [{TracingAnnotationTestModule, _}] = Code.compile_string(
       """
@@ -140,6 +157,24 @@ defmodule ScoutApm.TracingTest do
         end
       end
       """)
+    end
+
+    test "creates layers" do
+      Code.eval_string(
+      """
+      defmodule TracingAnnotationTestModule do
+        use ScoutApm.Tracing
+
+        def bar do
+          ScoutApm.Tracing.transaction(:web, "TracingMacro") do
+            1
+          end
+        end
+      end
+      """)
+
+      assert TracingAnnotationTestModule.bar() == 1
+      assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
     end
 
     # Note this lets you leave off the leading `ScoutApm.Tracing.` bit
