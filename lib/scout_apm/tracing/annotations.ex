@@ -12,6 +12,11 @@ defmodule ScoutApm.Tracing.Annotations do
   # timing/transaction wrapper functions.
   def on_definition(env, _kind, fun, args, guards, body) do
     mod = env.module
+    body = if is_list(body) && Keyword.has_key?(body, :do) do
+      Keyword.get(body, :do)
+    else
+      body
+    end
 
     collect_transactions(mod,fun,args,guards,body)
     collect_timings(mod,fun,args,guards,body)
