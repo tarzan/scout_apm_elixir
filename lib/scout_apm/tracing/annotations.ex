@@ -17,6 +17,10 @@ defmodule ScoutApm.Tracing.Annotations do
     else
       body
     end
+    if(fun == :handle_info) do
+      IO.inspect(Module.defines?(mod, {:handle_info, 2}), label: "on_definition")
+      IO.inspect(body, label: "on_definition")
+    end
 
     collect_transactions(mod,fun,args,guards,body)
     collect_timings(mod,fun,args,guards,body)
@@ -78,10 +82,17 @@ defmodule ScoutApm.Tracing.Annotations do
   defp instrument_transactions(mod) do
     mod
     |> Module.get_attribute(:scout_transactions)
+    |> IO.inspect(label: "Scout transactions")
     |> Enum.reverse
     |> Enum.map(
       fn(%ScoutApm.Tracing.Annotations.Transaction{} = transaction_data) ->
         override = {transaction_data.function_name, length(transaction_data.args)}
+
+        if(transaction_data.function_name == :handle_info) do
+          IO.inspect(Module.defines?(mod, {:handle_info, 2}), label: "instrument")
+          IO.inspect(transaction_data.body, label: "instrument")
+        end
+
         if !Module.overridable?(mod, override) do
           Module.make_overridable(mod, [override])
         end

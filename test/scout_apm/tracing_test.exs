@@ -38,6 +38,26 @@ defmodule ScoutApm.TracingTest do
       assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
     end
 
+    test "creates layers in GenServer handle_info/2" do
+      Code.eval_string(
+      """
+      defmodule TracingAnnotationTestGenServer do
+        use ScoutApm.Tracing
+
+        @transaction(type: "background", name: "handle_info/2")
+        def handle_info(:hello, state) do
+          :timer.sleep(100)
+          {:noreply, state}
+        end
+      end
+      """)
+
+      # {:ok, pid} = TracingAnnotationTestGenServer.start_link()
+      # assert send(pid, :hello)
+      assert TracingAnnotationTestGenServer.handle_info(:hello, "hi")
+      assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
+    end
+
     test "explicit name" do
       [{TracingAnnotationTestModule, _}] = Code.compile_string(
       """
