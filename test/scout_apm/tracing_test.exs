@@ -46,12 +46,10 @@ defmodule ScoutApm.TracingTest do
         import ScoutApm.Tracing
 
         deftransaction bar(1) do
-          bar(2)
           1
         end
 
         deftransaction bar(2) do
-          bar(3)
           2
         end
 

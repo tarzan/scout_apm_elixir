@@ -174,14 +174,18 @@ defmodule ScoutApm.Tracing do
   defmacro deftransaction(head, body) do
     function_head = Macro.to_string(head)
     quote do
+      module = __ENV__.module
+               |> Atom.to_string()
+               |> String.trim_leading("Elixir.")
+      Module.put_attribute(__ENV__.module, :name, "#{module}.#{unquote(function_head)}")
+
       def unquote(head) do
-        module = __ENV__.module
-                 |> Atom.to_string()
-                 |> String.trim_leading("Elixir.")
-        timing("background", "#{module}.#{unquote(function_head)}", []) do
+        transaction(:background, @name, []) do
           unquote(body[:do])
         end
       end
+
+      Module.delete_attribute(__ENV__.module, :name)
     end
   end
 
