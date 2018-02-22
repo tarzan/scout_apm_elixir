@@ -38,23 +38,61 @@ defmodule ScoutApm.TracingTest do
       assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
     end
 
+    test "creates layers on multiple" do
+      Code.eval_string(
+      """
+      defmodule TracingAnnotationTestModule do
+        use ScoutApm.Tracing
+
+        @transaction(type: "background", name: "bar1")
+        def bar(1) do
+          1
+        end
+
+        @transaction(type: "background", name: "bar2")
+        def bar(2) do
+          2
+        end
+
+        @transaction(type: "background", name: "bar3")
+        def bar(3) do
+          3
+        end
+      end
+      """)
+
+      assert TracingAnnotationTestModule.bar(1) == 1
+      assert TracingAnnotationTestModule.bar(2) == 2
+      assert TracingAnnotationTestModule.bar(3) == 3
+      assert %ScoutApm.TrackedRequest{root_layer: []} = Process.get(:scout_apm_request)
+    end
+
     test "creates layers in GenServer handle_info/2" do
       Code.eval_string(
       """
       defmodule TracingAnnotationTestGenServer do
         use ScoutApm.Tracing
+        use GenServer
+
+        def start_link() do
+          GenServer.start_link(__MODULE__, %{})
+        end
+
+        def init(_) do
+          {:ok, %{}}
+        end
 
         @transaction(type: "background", name: "handle_info/2")
-        def handle_info(:hello, state) do
+        def handle_info(_, state) do
           :timer.sleep(100)
           {:noreply, state}
         end
       end
       """)
 
-      # {:ok, pid} = TracingAnnotationTestGenServer.start_link()
-      # assert send(pid, :hello)
-      assert TracingAnnotationTestGenServer.handle_info(:hello, "hi")
+      {:ok, pid} = TracingAnnotationTestGenServer.start_link()
+      assert send(pid, :hello)
+      :timer.sleep(100)
       assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
     end
 
