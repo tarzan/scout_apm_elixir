@@ -25,37 +25,37 @@ defmodule ScoutApm.TracingTest do
       Code.eval_string(
       """
       defmodule TracingAnnotationTestModule do
-        use ScoutApm.Tracing
+        import ScoutApm.Tracing
 
-        @transaction(type: "background")
-        def bar do
-          1
+        @transaction_option [type: "web"]
+        deftransaction handle_info(:hello, state) when is_integer(state) do
+          state
         end
       end
       """)
 
-      assert TracingAnnotationTestModule.bar() == 1
+      assert TracingAnnotationTestModule.handle_info(:hello, 1) == 1
       assert %ScoutApm.TrackedRequest{} = Process.get(:scout_apm_request)
+                                          |> IO.inspect
     end
 
     test "creates layers on multiple" do
       Code.eval_string(
       """
       defmodule TracingAnnotationTestModule do
-        use ScoutApm.Tracing
+        import ScoutApm.Tracing
 
-        @transaction(type: "background", name: "bar1")
-        def bar(1) do
+        deftransaction bar(1) do
+          bar(2)
           1
         end
 
-        @transaction(type: "background", name: "bar2")
-        def bar(2) do
+        deftransaction bar(2) do
+          bar(3)
           2
         end
 
-        @transaction(type: "background", name: "bar3")
-        def bar(3) do
+        deftransaction bar(3) do
           3
         end
       end

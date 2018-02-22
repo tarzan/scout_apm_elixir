@@ -171,6 +171,20 @@ defmodule ScoutApm.Tracing do
     end
   end
 
+  defmacro deftransaction(head, body) do
+    function_head = Macro.to_string(head)
+    quote do
+      def unquote(head) do
+        module = __ENV__.module
+                 |> Atom.to_string()
+                 |> String.trim_leading("Elixir.")
+        timing("background", "#{module}.#{unquote(function_head)}", []) do
+          unquote(body[:do])
+        end
+      end
+    end
+  end
+
   @doc """
   Times the execution of the given `block` of code, labeling it with `category` and `name` within Scout.
 
