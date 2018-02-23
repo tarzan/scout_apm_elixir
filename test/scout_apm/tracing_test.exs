@@ -62,7 +62,7 @@ defmodule ScoutApm.TracingTest do
       assert TracingAnnotationTestModule.bar(1) == 1
       assert TracingAnnotationTestModule.bar(2) == 2
       assert TracingAnnotationTestModule.bar(3) == 3
-      assert %ScoutApm.TrackedRequest{root_layer: []} = Process.get(:scout_apm_request)
+      assert is_nil(Process.get(:scout_apm_request))
     end
 
     test "creates layers in GenServer handle_info/2" do
