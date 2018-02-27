@@ -27,44 +27,24 @@ defmodule ScoutApm.Store do
   end
 
   def record_web_metric(%Metric{} = metric) do
-    case Process.whereis(__MODULE__) do
-      nil -> ScoutApm.Logger.log(:info, "Couldn't find ScoutAPM Store Process. :scout_apm application is likely not started.")
-      pid ->
-        GenServer.cast(pid, {:record_web_metric, metric})
-    end
+    GenServer.cast(__MODULE__, {:record_web_metric, metric})
   end
 
   def record_web_trace(%WebTrace{} = trace) do
-    case Process.whereis(__MODULE__) do
-      nil -> ScoutApm.Logger.log(:info, "Couldn't find ScoutAPM Store Process. :scout_apm application is likely not started.")
-      pid ->
-        GenServer.cast(pid, {:record_web_trace, trace})
-    end
+    GenServer.cast(__MODULE__, {:record_web_trace, trace})
   end
 
   def record_job_record(%JobRecord{} = job_record) do
-    case Process.whereis(__MODULE__) do
-      nil -> ScoutApm.Logger.log(:info, "Couldn't find ScoutAPM Store Process. :scout_apm application is likely not started.")
-      pid ->
-        GenServer.cast(pid, {:record_job_record, job_record})
-    end
+    GenServer.cast(__MODULE__, {:record_job_record, job_record})
   end
 
   def record_job_trace(%JobTrace{} = job_trace) do
-    case Process.whereis(__MODULE__) do
-      nil -> ScoutApm.Logger.log(:info, "Couldn't find ScoutAPM Store Process. :scout_apm application is likely not started.")
-      pid ->
-        GenServer.cast(pid, {:record_job_trace, job_trace})
-    end
+    GenServer.cast(__MODULE__, {:record_job_trace, job_trace})
   end
 
 
   def record_per_minute_histogram(key, duration) do
-    case Process.whereis(__MODULE__) do
-      nil -> ScoutApm.Logger.log(:info, "Couldn't find worker!?")
-      pid ->
-        GenServer.cast(pid, {:record_per_minute_histogram, key, duration})
-    end
+    GenServer.cast(__MODULE__, {:record_per_minute_histogram, key, duration})
   end
 
   ## Server Callbacks
