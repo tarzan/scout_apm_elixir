@@ -1,6 +1,6 @@
 defmodule ScoutApm.Internal.Duration do
   @type t :: %__MODULE__{value: number()}
-  @type unit :: :microseconds | :milliseconds | :seconds
+  @type unit :: :microseconds | :microsecond | :milliseconds | :millisecond | :seconds | :second
 
   defstruct [
     :value
@@ -16,8 +16,11 @@ defmodule ScoutApm.Internal.Duration do
 
   @spec as(t, unit) :: number()
   def as(%__MODULE__{value: value}, :microseconds), do: value
+  def as(%__MODULE__{value: value}, :microsecond), do: value
   def as(%__MODULE__{value: value}, :milliseconds), do: value / 1_000
+  def as(%__MODULE__{value: value}, :millisecond), do: value / 1_000
   def as(%__MODULE__{value: value}, :seconds), do: value / 1_000_000
+  def as(%__MODULE__{value: value}, :second), do: value / 1_000_000
 
   @spec add(t, t) :: t
   def add(%__MODULE__{value: v1}, %__MODULE__{value: v2}) do
@@ -48,6 +51,9 @@ defmodule ScoutApm.Internal.Duration do
   end
 
   defp normalize_value(value, :microseconds), do: value
+  defp normalize_value(value, :microsecond), do: value
   defp normalize_value(value, :milliseconds), do: value * 1000
+  defp normalize_value(value, :millisecond), do: value * 1000
   defp normalize_value(value, :seconds), do: value * 1_000_000
+  defp normalize_value(value, :second), do: value * 1_000_000
 end
